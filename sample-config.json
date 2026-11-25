@@ -1,0 +1,61 @@
+{
+  "name": "cupcake-activity-configs-demo",
+  "description": "Remote pedagogical AI assistant powered by Ollama Cloud on port 8098",
+  "access": "public",
+  "browser": {
+    "hints": {
+      "source": "dynamic",
+      "label": "AI Hints",
+      "unlockAfterAttempts": 1,
+      "stream": true
+    },
+    "feedback": {
+      "source": "dynamic",
+      "label": "AI Feedback",
+      "stream": true
+    },
+    "explanation": {
+      "source": "dynamic",
+      "label": "Explain",
+      "stream": true
+    },
+    "evaluation": {
+      "runner": "external",
+      "checkButtonLabel": "Check Answer",
+      "showExpectedOutput": true
+    },
+    "tryAgain": {
+      "label": "Try Again"
+    },
+    "reportIssue": {
+      "source": "external",
+      "label": "Feedback"
+    }
+  },
+  "backend": {
+    "endpoints": {
+      "hints": {
+        "url": "http://localhost:8098/hints",
+        "method": "POST",
+        "stream": true,
+        "timeoutMs": 45000
+      },
+      "feedback": {
+        "url": "http://localhost:8098/feedback",
+        "method": "POST",
+        "stream": true,
+        "timeoutMs": 45000
+      },
+      "evaluate": {
+        "url": "http://localhost:8098/evaluate",
+        "method": "POST",
+        "timeoutMs": 15000
+      },
+      "report": {
+        "url": "http://localhost:8098/report",
+        "method": "POST",
+        "timeoutMs": 10000
+      }
+    }
+  }
+}
