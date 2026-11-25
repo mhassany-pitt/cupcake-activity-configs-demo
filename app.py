@@ -44,7 +44,7 @@ def get_hints():
 
     system_prompt, user_prompt = PromptBuilder.build_hint_prompt(payload)
 
-    hint_index = payload.get("hintIndex", 0)
+    hint_index = int(payload.get("currentHintIndex") if payload.get("currentHintIndex") is not None else payload.get("hintIndex", 0))
     total_hints = payload.get("totalHints", 3)
     has_next = (hint_index + 1) < total_hints
 
@@ -70,6 +70,10 @@ def get_feedback():
     payload = request.get_json(silent=True) or {}
     logger.info(f"[/feedback] Received feedback request: activityId={payload.get('activityId')}, passed={payload.get('passed')}")
 
+    feedback_index = int(payload.get("feedbackIndex") or 0)
+    total_feedback = int(payload.get("totalFeedback") or 2)
+    has_next = (feedback_index + 1) < total_feedback
+
     system_prompt, user_prompt = PromptBuilder.build_feedback_prompt(payload)
 
     def stream_generator():
@@ -81,6 +85,7 @@ def get_feedback():
     response = Response(stream_generator(), mimetype="text/event-stream")
     response.headers["Cache-Control"] = "no-cache"
     response.headers["Connection"] = "keep-alive"
+    response.headers["x-has-next"] = "true" if has_next else "false"
     return response
 
 
@@ -91,6 +96,10 @@ def get_explanation():
     """
     payload = request.get_json(silent=True) or {}
     logger.info(f"[/explanation] Received explanation request: activityId={payload.get('activityId')}, activityType={payload.get('activityType')}")
+
+    explanation_index = int(payload.get("explanationIndex") or 0)
+    total_explanations = int(payload.get("totalExplanations") or 2)
+    has_next = (explanation_index + 1) < total_explanations
 
     system_prompt, user_prompt = PromptBuilder.build_explanation_prompt(payload)
 
@@ -103,6 +112,7 @@ def get_explanation():
     response = Response(stream_generator(), mimetype="text/event-stream")
     response.headers["Cache-Control"] = "no-cache"
     response.headers["Connection"] = "keep-alive"
+    response.headers["x-has-next"] = "true" if has_next else "false"
     return response
 
 
