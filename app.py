@@ -84,6 +84,28 @@ def get_feedback():
     return response
 
 
+@app.route("/explanation", methods=["POST"])
+def get_explanation():
+    """
+    On-demand explanation endpoint streaming SSE tokens for blanks, blocks, lines, or visualization steps.
+    """
+    payload = request.get_json(silent=True) or {}
+    logger.info(f"[/explanation] Received explanation request: activityId={payload.get('activityId')}, activityType={payload.get('activityType')}")
+
+    system_prompt, user_prompt = PromptBuilder.build_explanation_prompt(payload)
+
+    def stream_generator():
+        for chunk in ollama_client.stream_chat(system_prompt, user_prompt):
+            data = json.dumps({"text": chunk})
+            yield f"data: {data}\n\n"
+        yield "data: [DONE]\n\n"
+
+    response = Response(stream_generator(), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Connection"] = "keep-alive"
+    return response
+
+
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
     """
